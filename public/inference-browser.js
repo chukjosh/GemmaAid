@@ -8,7 +8,7 @@
 
 import { SYSTEM_PROMPT } from "./prompt.js";
 
-const MODEL_URL = "/models/gemma-2b-it-cpu-int4.task"; // swap for your hosted model file
+const MODEL_URL = "/models/gemma3-1b-it-int4-web.task"; // swap for your hosted model file
 
 let llmInference = null;
 

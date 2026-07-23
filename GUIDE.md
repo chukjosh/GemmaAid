@@ -80,7 +80,7 @@ host machine's local IP (`ipconfig` on Windows, `ifconfig` or
 This is the fully offline, no-server path. It requires a Gemma model
 converted to MediaPipe's `.task` format, placed at:
 ```
-public/models/gemma-2b-it-cpu-int4.task
+public/models/gemma3-1b-it-int4-web.task
 ```
 
 Steps:

@@ -28,22 +28,22 @@ STRICT RULES:
 // we're running in-browser or via the server, and acts as a safety net in
 // case the model itself doesn't call out the emergency clearly.
 const EMERGENCY_PATTERNS = [
-  /chest (pain|pressure|tightness)/i,
-  /(can't|cannot|difficulty) breath/i,
-  /severe bleeding/i,
-  /(face|arm).{0,15}(droop|weak|numb)/i,
-  /slurred speech/i,
-  /unconscious|passed out|unresponsive/i,
-  /swelling.{0,15}(face|throat|lips)/i,
-  /seizure/i,
-  /poison|overdose/i,
-  /heavy bleeding.{0,15}pregnan|pregnan.{0,15}heavy bleeding/i,
+   //   /chest (pain|pressure|tightness)/i,
+   //   /(can't|cannot|difficulty) breath/i,
+   //   /severe bleeding/i,
+   //   /(face|arm).{0,15}(droop|weak|numb)/i,
+   //   /slurred speech/i,
+   //   /unconscious|passed out|unresponsive/i,
+   //   /swelling.{0,15}(face|throat|lips)/i,
+   //   /seizure/i,
+   //   /poison|overdose/i,
+   //   /heavy bleeding.{0,15}pregnan|pregnan.{0,15}heavy bleeding/i,
 ];
 
 export function detectEmergency(text) {
-  for (const pattern of EMERGENCY_PATTERNS) {
-    const match = text.match(pattern);
-    if (match) return { reason: match[0], severity: "critical" };
-  }
-  return null;
+   for (const pattern of EMERGENCY_PATTERNS) {
+      const match = text.match(pattern);
+      if (match) return { reason: match[0], severity: "critical" };
+   }
+   return null;
 }
