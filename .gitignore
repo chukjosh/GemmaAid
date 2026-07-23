@@ -1,0 +1,15 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Model files — large binaries that should not be committed to a public repo.
+# Document where to obtain these in GUIDE.md instead.
+public/models/*.task
+public/models/*.bin
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
