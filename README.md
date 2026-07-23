@@ -45,18 +45,23 @@ reflecting how the app is actually running rather than a static label.
 ## Project structure
 
 ```
-public/                     the PWA (works standalone as a static site)
-  index.html
-  app.js                    selects engine, drives chat + emergency banner
-  inference-browser.js      MediaPipe / on-device engine
-  inference-server.js       calls the FastAPI fallback
-  prompt.js                 shared system prompt + emergency keyword check
-  sw.js                     service worker – caches the app shell offline
-  styles.css                visual design
-  manifest.json
-server/
-  main.py                   FastAPI app: serves the PWA + /api/chat via Ollama
-GUIDE.md                    setup, run, and demo instructions
+GemmaAid/
+  public/                       the PWA (works standalone as a static site)
+    models/                     the Gemma model file (mediaPipe)
+    icon-192.png                the app icon (for installing the PWA)
+    icon-512.png                the app icon (for installing the PWA)
+    index.html                  the main PWA page (entry point)
+    app.js                      selects engine, drives chat + emergency banner
+    inference-browser.js        MediaPipe / on-device engine
+    inference-server.js         calls the FastAPI fallback
+    prompt.js                   shared system prompt + emergency keyword check
+    sw.js                       service worker – caches the app shell offline
+    styles.css                  visual design
+    manifest.json
+  server/                       
+    main.py                     FastAPI app: serves the PWA + /api/chat via Ollama
+  GUIDE.md                      setup, run, and demo instructions
+  .gitignore                    the .gitignore file
 ```
 
 ## Guardrails
