@@ -3,17 +3,30 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>GemmaAid — Offline Health Guidance</title>
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#1F8F6C" />
+  <meta name="theme-color" content="#070c0a" id="meta-theme-color" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
+  <!-- Marked.js for parsing Markdown in chat responses -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Prevent light/dark theme flicker on load -->
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+        document.documentElement.classList.add('light-mode');
+      }
+    })();
+  </script>
 </head>
 
 <body>
@@ -23,7 +36,8 @@
       <div class="brand">
         <span class="mark" aria-hidden="true">
           <svg viewBox="0 0 32 32" width="22" height="22">
-            <path d="M16 3 L16 29 M3 16 L29 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none" />
+            <path d="M16 3 L16 29 M3 16 L29 16" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+              fill="none" />
           </svg>
         </span>
         <div class="brand-text">
@@ -32,9 +46,32 @@
         </div>
       </div>
 
-      <div class="signal" id="signal" title="Connection mode">
-        <span class="signal-dot" id="signal-dot"></span>
-        <span class="signal-label" id="signal-label">Checking device…</span>
+      <div class="header-controls">
+        <div class="signal" id="signal" title="Connection mode">
+          <span class="signal-dot" id="signal-dot"></span>
+          <span class="signal-label" id="signal-label">Checking device…</span>
+        </div>
+
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Light and Dark Mode" title="Toggle theme">
+          <!-- Sun Icon (shown in dark mode) -->
+          <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon Icon (shown in light mode) -->
+          <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
       </div>
     </header>
 

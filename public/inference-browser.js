@@ -30,7 +30,7 @@ export async function load(onProgress) {
 
   llmInference = await LlmInference.createFromOptions(genaiFileset, {
     baseOptions: { modelAssetPath: MODEL_URL },
-    maxTokens: 512,
+    maxTokens: 2048,
     topK: 40,
     temperature: 0.6,
     // onProgress fires during the (one-time) model download so the UI
@@ -42,14 +42,24 @@ export async function load(onProgress) {
 export async function chat(history) {
   if (!llmInference) throw new Error("Model not loaded yet");
 
-  // MediaPipe's current web API takes a single prompt string rather than a
-  // structured message list, so we flatten history + system prompt here.
-  const transcript = [
-    SYSTEM_PROMPT,
-    ...history.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`),
-    "Assistant:",
-  ].join("\n\n");
+  // Keep only the most recent 6 messages to save context room
+  const recentHistory = history.slice(-6);
 
-  const result = await llmInference.generateResponse(transcript);
+  // Clearly delineate the instructions from the user's input so Gemma 
+  // doesn't treat system guidelines as current symptoms.
+  const turns = recentHistory.map((m, index) => {
+    let content = m.content;
+
+    if (index === 0 && m.role === "user") {
+      content = `[System Instructions: ${SYSTEM_PROMPT}]\n\n[User Input: ${m.content}]`;
+    }
+
+    const turnRole = m.role === "user" ? "user" : "model";
+    return `<start_of_turn>${turnRole}\n${content}<end_of_turn>`;
+  });
+
+  const fullPrompt = `${turns.join("\n")}\n<start_of_turn>model\n`;
+
+  const result = await llmInference.generateResponse(fullPrompt);
   return result;
 }

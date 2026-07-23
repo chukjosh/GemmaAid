@@ -2,11 +2,13 @@ import { detectEmergency } from "./prompt.js";
 import * as browserEngine from "./inference-browser.js";
 import * as serverEngine from "./inference-server.js";
 
-// Configure marked for safe, clean rendering
-marked.setOptions({
-  breaks: true,      // newlines become <br> inside paragraphs
-  gfm: true,         // GitHub Flavoured Markdown (tables, strikethrough, etc.)
-});
+// Configure marked if available, with safe fallback defaults
+if (typeof marked !== "undefined") {
+  marked.setOptions({
+    breaks: true, // newlines become <br> inside paragraphs
+    gfm: true, // GitHub Flavoured Markdown (tables, lists, bold, etc.)
+  });
+}
 
 const messagesEl = document.getElementById("messages");
 const introEl = document.getElementById("intro");
@@ -22,13 +24,13 @@ let engineName = "";
 let history = [];
 
 async function pickEngine() {
-  statusEl.textContent = "Checking device capabilities…";
+  if (statusEl) statusEl.textContent = "Checking device capabilities…";
 
   if (await browserEngine.isAvailable()) {
     try {
-      statusEl.textContent = "Loading on-device model (first run only)…";
+      if (statusEl) statusEl.textContent = "Loading on-device model (first run only)…";
       await browserEngine.load((progress) => {
-        statusEl.textContent = `Downloading model: ${Math.round(progress * 100)}%`;
+        if (statusEl) statusEl.textContent = `Downloading model: ${Math.round(progress * 100)}%`;
       });
       engine = browserEngine;
       engineName = "on-device";
@@ -49,6 +51,8 @@ async function pickEngine() {
 }
 
 function renderSignal() {
+  if (!signalEl || !signalLabelEl) return;
+
   signalEl.classList.remove("on-device", "local-server", "offline");
   signalEl.classList.add(engineName);
 
@@ -56,13 +60,44 @@ function renderSignal() {
     engineName === "on-device"
       ? "On-device — no server needed"
       : engineName === "local-server"
-      ? "Local server (Ollama + Gemma 4)"
-      : "Not connected";
+        ? "Local server (Ollama + Gemma)"
+        : "Not connected";
 
-  statusEl.textContent =
-    engineName === "offline"
-      ? "Connect once to download the on-device model, or start the local server."
-      : "";
+  if (statusEl) {
+    statusEl.textContent =
+      engineName === "offline"
+        ? "Connect once to download the on-device model, or start the local server."
+        : "";
+  }
+}
+
+function parseAndSanitizeMarkdown(content, isUser = false) {
+  let formattedContent = content;
+
+  if (!isUser) {
+    // 1. Force double line breaks before numbered items like " 1. ", " 2. "
+    formattedContent = formattedContent.replace(/(\s)(\d+\.\s+\*\*)/g, "\n\n$2");
+
+    // 2. Force double line breaks before bold titles or headers like " **Disclaimer:**" or " **Here's"
+    formattedContent = formattedContent.replace(/(\.\s+|\!\s+)(\*\*[^*]+\*\*:?)/g, "$1\n\n$2");
+
+    // 3. Clean up extra spacing
+    formattedContent = formattedContent.trim();
+  }
+
+  let parsedHtml = formattedContent;
+
+  // Use marked parser if available
+  if (typeof marked !== "undefined") {
+    parsedHtml = isUser ? marked.parseInline(formattedContent) : marked.parse(formattedContent);
+  }
+
+  // Use DOMPurify if loaded
+  if (typeof DOMPurify !== "undefined") {
+    return DOMPurify.sanitize(parsedHtml);
+  }
+
+  return parsedHtml;
 }
 
 function appendMessage(role, content) {
@@ -70,14 +105,7 @@ function appendMessage(role, content) {
   const el = document.createElement("div");
   el.className = `msg msg-${role}`;
 
-  // Render Markdown for both roles; sanitize the HTML before injecting.
-  // For user messages we use inline parsing so a plain sentence doesn't get
-  // wrapped in a superfluous <p> tag, while assistant replies get full block
-  // Markdown (headings, lists, code blocks, bold, tables, etc.).
-  const raw =
-    role === "user"
-      ? DOMPurify.sanitize(marked.parseInline(content))
-      : DOMPurify.sanitize(marked.parse(content));
+  const raw = parseAndSanitizeMarkdown(content, role === "user");
 
   el.innerHTML = raw;
   messagesEl.appendChild(el);
@@ -85,6 +113,7 @@ function appendMessage(role, content) {
 }
 
 function showEmergency(reason) {
+  if (!bannerEl) return;
   bannerEl.hidden = false;
   bannerEl.textContent = `Seek emergency care immediately — flagged: ${reason}`;
 }
@@ -103,8 +132,8 @@ formEl.addEventListener("submit", async (e) => {
   const emergency = detectEmergency(text);
   if (emergency) showEmergency(emergency.reason);
 
-  statusEl.textContent = "Thinking…";
-  
+  if (statusEl) statusEl.textContent = "Thinking…";
+
   // Show visual typing indicator
   const typingIndicator = document.createElement("div");
   typingIndicator.className = "msg msg-assistant msg-typing";
@@ -115,7 +144,7 @@ formEl.addEventListener("submit", async (e) => {
 
   try {
     const reply = await engine.chat(history);
-    
+
     // Remove visual typing indicator
     const indicatorEl = document.getElementById("typing-indicator");
     if (indicatorEl) indicatorEl.remove();
@@ -133,12 +162,31 @@ formEl.addEventListener("submit", async (e) => {
     appendMessage("assistant", "Something went wrong reaching the model. Please try again.");
     console.error(err);
   } finally {
-    if (engineName !== "offline") statusEl.textContent = "";
+    if (engineName !== "offline" && statusEl) statusEl.textContent = "";
+    inputEl.focus();
   }
 });
 
 pickEngine().then(renderSignal);
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+  navigator.serviceWorker.register("sw.js").catch((err) => {
+    console.warn("ServiceWorker registration failed:", err);
+  });
 }
+
+// Theme Toggle Handler
+const themeToggleBtn = document.getElementById("theme-toggle");
+const metaThemeColor = document.getElementById("meta-theme-color");
+
+themeToggleBtn?.addEventListener("click", () => {
+  const isLight = document.documentElement.classList.toggle("light-mode");
+
+  // Save preference
+  localStorage.setItem("theme", isLight ? "light" : "dark");
+
+  // Update mobile status bar theme color
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute("content", isLight ? "#f4f9f6" : "#070c0a");
+  }
+});

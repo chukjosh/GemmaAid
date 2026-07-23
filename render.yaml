@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: GemmaAid
+    env: python
+    region: frankfurt # <--- Set to Frankfurt for lowest ping in Lagos
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn server.main:app --host 0.0.0.0 --port $PORT"
+
+    # Mandatory headers for WebGPU / SharedArrayBuffer on MediaPipe
+    headers:
+      - path: /*
+        name: Cross-Origin-Opener-Policy
+        value: same-origin
+      - path: /*
+        name: Cross-Origin-Embedder-Policy
+        value: require-corp
