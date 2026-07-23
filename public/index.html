@@ -2,60 +2,78 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>GemmaAid – Offline Health Guidance</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#070c0a" id="meta-theme-color" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- Marked.js for parsing Markdown in chat responses -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css" />
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070c0a" id="meta-theme-color">
+  <meta name="description" content="Local, privacy-first AI medical assistant powered by Gemma WebGPU.">
 
-  <!-- Prevent light/dark theme flicker on load -->
-  <script>
-    (function () {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-        document.documentElement.classList.add('light-mode');
-      }
-    })();
-  </script>
+  <title>Gemma First-Aid & Medical Assistant</title>
+
+  <!-- PWA Manifest & Favicon -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234cd9a8'><path d='M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z'/></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- External Libraries: Marked (Markdown) & DOMPurify (HTML Sanitization) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
-  <div class="app-shell">
 
+  <!-- Main Application Wrapper -->
+  <main class="app-shell">
+
+    <!-- App Header -->
     <header class="app-header">
       <div class="brand">
-        <span class="mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="22" height="22">
-            <path d="M16 3 L16 29 M3 16 L29 16" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-              fill="none" />
+        <!-- Medical Cross Logo Icon -->
+        <div class="mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z" />
           </svg>
-        </span>
+        </div>
+
+        <!-- App Title and Tagline -->
         <div class="brand-text">
-          <h1>GemmaAid</h1>
-          <p class="tagline">Health guidance that works without a signal</p>
+          <div class="title-row">
+            <h1>First-Aid Assistant</h1>
+          </div>
+          <p class="tagline">Private, local medical & emergency guide</p>
         </div>
       </div>
 
+      <!-- Top Header Action Controls -->
       <div class="header-controls">
-        <div class="signal" id="signal" title="Connection mode">
-          <span class="signal-dot" id="signal-dot"></span>
-          <span class="signal-label" id="signal-label">Checking device…</span>
+        <!-- AI Engine Connection Status Badge -->
+        <div class="signal" id="signal">
+          <span class="signal-dot"></span>
+          <span class="signal-label" id="signal-label">Connecting…</span>
         </div>
 
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Light and Dark Mode" title="Toggle theme">
-          <!-- Sun Icon (shown in dark mode) -->
-          <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Audio Alert Toggle Button -->
+        <!-- <button class="control-btn" id="sound-toggle" title="Toggle audio feedback" aria-label="Toggle audio feedback">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button> -->
+
+        <!-- Dark/Light Theme Toggle Button -->
+        <button class="control-btn" id="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -66,51 +84,94 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <!-- Moon Icon (shown in light mode) -->
-          <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
       </div>
     </header>
 
-    <div id="emergency-banner" class="emergency-banner" role="alert" hidden></div>
-
-    <main id="messages" class="messages" aria-live="polite">
-      <div class="intro" id="intro">
-        <p class="intro-eyebrow">Before you start</p>
-        <h2>Tell me what's going on</h2>
-        <p class="intro-body">
-          Describe a symptom or situation in your own words. I'll give
-          plain-language guidance, home-care steps where appropriate, and
-          tell you clearly when to seek in-person care.
-        </p>
+    <!-- Context Session & Memory Bar -->
+    <div class="session-bar">
+      <div class="memory-indicator">
+        <span class="memory-dot"></span>
+        <span id="memory-text">Memory: 0% used (0/12 turns)</span>
       </div>
-    </main>
+      <button class="clear-session-btn" id="clear-btn" title="Clear chat history">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Clear Session
+      </button>
+    </div>
 
-    <p id="status" class="status" role="status"></p>
+    <!-- Red Flag Emergency Alert Banner (Hidden by default) -->
+    <div class="emergency-banner" id="emergency-banner" role="alert" hidden>
+      <div class="emergency-content">
+        <strong id="emergency-text">🚨 Critical Symptoms Detected!</strong>
+        <a href="tel:911" class="emergency-call-btn">Call Emergency Services (911)</a>
+      </div>
+    </div>
 
-    <form id="chat-form" class="chat-form">
-      <input id="chat-input" type="text" placeholder="e.g. mild fever and headache since this morning"
-        autocomplete="off" />
-      <button type="submit" aria-label="Send">
-        <svg viewBox="0 0 24 24" width="18" height="18">
-          <path d="M4 12 L20 12 M13 5 L20 12 L13 19" stroke="currentColor" stroke-width="2.2" fill="none"
-            stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Active Chat Container -->
+    <div class="messages" id="messages">
+      <!-- Welcome Intro Box -->
+      <div class="intro" id="intro">
+        <div class="intro-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <p class="intro-eyebrow">Local On-Device Intelligence</p>
+        <h2>How can I help you right now?</h2>
+        <p class="intro-body">Describe symptoms or ask about first-aid procedures. All data stays strictly private on
+          your device.</p>
+
+        <!-- Quick Starter Action Chips -->
+        <div class="quick-chips">
+          <button class="chip" data-prompt="How do I perform CPR on an adult?">Adult CPR steps</button>
+          <button class="chip" data-prompt="First aid for a minor burn from hot stove">Heat burn treatment</button>
+          <button class="chip" data-prompt="How to stop a heavy nosebleed?">Stop nosebleed</button>
+          <button class="chip" data-prompt="What are the main warning signs of a stroke?">Stroke warning signs</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Model Load Progress & Status Bar -->
+    <div class="status-bar" id="status-bar">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <span id="status-text">Initializing AI engine…</span>
+        <!-- Powered by Gemma Badge moved down inside the chat interface -->
+        <span class="gemma-badge">Powered by Gemma AI</span>
+      </div>
+      <div class="status-progress-track" id="status-progress" hidden>
+        <div class="status-progress-fill" id="status-progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Chat Prompt Input Form -->
+    <form class="chat-form" id="chat-form">
+      <input type="text" id="chat-input" placeholder="Type a symptom or medical query…" autocomplete="off" required
+        disabled>
+      <button type="submit" id="send-btn" aria-label="Send Message" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
       </button>
     </form>
 
+    <!-- Medical Safety Disclaimer -->
     <footer class="disclaimer">
-      General information only, not a diagnosis. In an emergency, seek in-person care immediately.
+      ⚠️ For informational purposes only. In life-threatening emergencies, immediately call your local emergency number.
     </footer>
 
-  </div>
+  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-  <script type="module" src="app.js"></script>
+  <!-- Application Logic JS Script -->
+  <script type="module" src="./app.js"></script>
 </body>
 
 </html>
