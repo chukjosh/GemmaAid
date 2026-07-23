@@ -10,12 +10,12 @@ export async function isAvailable() {
     const res = await fetch("/api/health", { method: "GET" });
     return res.ok;
   } catch {
-    return false; // server not reachable — e.g. truly offline with no local server
+    return false; // server not reachable – e.g. truly offline with no local server
   }
 }
 
 export async function load() {
-  // No local load step needed — the model already lives on the server.
+  // No local load step needed – the model already lives on the server.
   return true;
 }
 

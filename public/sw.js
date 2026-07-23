@@ -1,7 +1,7 @@
 // GemmaAid service worker
 // Caches the app shell so the PWA loads with zero network after first visit.
 // The Gemma model file itself is cached separately by MediaPipe's own
-// storage (IndexedDB), not here — this just ensures the UI always boots.
+// storage (IndexedDB), not here – this just ensures the UI always boots.
 
 const CACHE_NAME = "gemmaaid-shell-v1";
 const SHELL_FILES = [
@@ -35,7 +35,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Never intercept calls to the local inference server — those need to
+  // Never intercept calls to the local inference server – those need to
   // reach the network (localhost) live, not be cached.
   if (event.request.url.includes("/api/")) return;
 

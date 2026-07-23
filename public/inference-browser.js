@@ -1,5 +1,5 @@
 // In-browser inference using MediaPipe's LLM Inference API.
-// Model runs entirely on-device via WebGPU — no server, no network calls
+// Model runs entirely on-device via WebGPU – no server, no network calls
 // after the model file is downloaded and cached once.
 //
 // Requires a quantized Gemma model file (.task/.bin format for MediaPipe).

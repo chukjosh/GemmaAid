@@ -1,5 +1,5 @@
 """
-GemmaAid backend — serves the PWA and provides the /api/chat
+GemmaAid backend – serves the PWA and provides the /api/chat
 fallback used when a device can't run Gemma 4 in-browser.
 
 This complements the in-browser MediaPipe engine rather than competing
@@ -78,5 +78,5 @@ def chat(req: ChatRequest):
 
 
 # Serve the PWA itself so the whole app works from one server during
-# the demo — no separate frontend host needed.
+# the demo – no separate frontend host needed.
 app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="static")

@@ -2,7 +2,7 @@
 
 **Health guidance that works without a signal.**
 
-A Gemma 4–powered offline health information PWA, built with two
+A Gemma-powered offline health information PWA, built with two
 complementary inference modes so the app works across device capability
 levels.
 
@@ -24,11 +24,11 @@ in-browser-only approach excludes low-end phones without WebGPU; a
 server-only approach isn't truly offline or portable. GemmaAid selects the
 best available option automatically:
 
-1. **On-device** — MediaPipe LLM Inference running Gemma 4 in the browser
+1. **On-device** – MediaPipe LLM Inference running Gemma 4 in the browser
    via WebGPU. The model downloads once, then runs with zero network and
    zero server, indefinitely.
-2. **Local server** — FastAPI + Ollama + Gemma 4, for devices that can't
-   run the model in-browser. Still no internet required — only a nearby
+2. **Local server** – FastAPI + Ollama + Gemma 4, for devices that can't
+   run the model in-browser. Still no internet required – only a nearby
    machine on the same local network.
 
 A signal indicator in the header shows which mode is active in real time,
@@ -51,7 +51,7 @@ public/                     the PWA (works standalone as a static site)
   inference-browser.js      MediaPipe / on-device engine
   inference-server.js       calls the FastAPI fallback
   prompt.js                 shared system prompt + emergency keyword check
-  sw.js                     service worker — caches the app shell offline
+  sw.js                     service worker – caches the app shell offline
   styles.css                visual design
   manifest.json
 server/
@@ -61,7 +61,7 @@ GUIDE.md                    setup, run, and demo instructions
 
 ## Guardrails
 
-- Never diagnoses — uses "could be consistent with" language
+- Never diagnoses – uses "could be consistent with" language
 - Never gives medication dosing
 - Every response ends with a disclaimer
 - A client-side keyword check flags obvious emergencies immediately,

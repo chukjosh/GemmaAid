@@ -1,4 +1,4 @@
-# GemmaAid — Setup & Run Guide
+# GemmaAid – Setup & Run Guide
 
 This guide covers everything needed to set up and run GemmaAid, in order.
 Steps 1–4 require internet for the initial downloads; after that, the app
@@ -16,7 +16,7 @@ runs fully offline.
 | **Node.js (optional)** | Only needed for an alternate static-file dev server | https://nodejs.org |
 
 No build tooling (Docker, React, Webpack, Ionic, Capacitor) is required for
-this build — the PWA is plain HTML/JS by design, so there is nothing to
+this build – the PWA is plain HTML/JS by design, so there is nothing to
 compile.
 
 ---
@@ -90,15 +90,15 @@ Steps:
 3. Serve `public/` as static files (the FastAPI server already does this,
    as long as `models/` sits inside `public/`).
 4. Open the app in a WebGPU-enabled browser with an internet connection
-   for the first load only — the model downloads once and is cached.
+   for the first load only – the model downloads once and is cached.
 5. Reload with the network disabled to confirm it still works.
 
 If this step isn't completed, server mode remains fully functional on its
-own — the architecture is designed so either mode works independently.
+own – the architecture is designed so either mode works independently.
 
 > **Do not commit the `.task` model file to the repository.** It is a
 > multi-gigabyte binary and the hackathon requires a public code
-> repository — committing it will make the repo unusable to clone and may
+> repository – committing it will make the repo unusable to clone and may
 > exceed size limits on GitHub. `.gitignore` already excludes it. Instead,
 > document where to obtain the model (source/link) in the write-up or a
 > comment in `inference-browser.js`, so anyone reviewing the code knows
@@ -131,7 +131,7 @@ Then open `http://localhost:8000`.
 | "What dose of paracetamol should I take?" | The model should decline to give a specific dose and suggest a health worker or pharmacist instead |
 
 If the emergency banner does not fire as expected, check
-`public/prompt.js` — `EMERGENCY_PATTERNS` is a plain keyword/regex list
+`public/prompt.js` – `EMERGENCY_PATTERNS` is a plain keyword/regex list
 that can be extended.
 
 ---
@@ -146,13 +146,13 @@ site into an installed app with one action.
 
 ## 8. Troubleshooting
 
-- **"Connection refused" in the browser** — Ollama or the uvicorn server
+- **"Connection refused" in the browser** – Ollama or the uvicorn server
   isn't running; check both terminals.
-- **Slow responses** — expected on CPU-only hardware; a quantized
+- **Slow responses** – expected on CPU-only hardware; a quantized
   on-device model or GPU acceleration would reduce latency in production.
-- **WebGPU not available** — expected on some laptops or older browser
+- **WebGPU not available** – expected on some laptops or older browser
   versions; this is the reason the server fallback exists.
-- **`pip install` fails without `--break-system-packages`** — this flag is
+- **`pip install` fails without `--break-system-packages`** – this flag is
   required on newer Debian/Ubuntu-based systems.
 
 ---
@@ -160,7 +160,7 @@ site into an installed app with one action.
 ## 9. Demo checklist
 
 1. Open the installed PWA.
-2. Submit a mild-symptom question — confirm calm, structured, non-diagnostic guidance.
-3. Submit an emergency-symptom question — confirm the banner fires immediately.
+2. Submit a mild-symptom question – confirm calm, structured, non-diagnostic guidance.
+3. Submit an emergency-symptom question – confirm the banner fires immediately.
 4. Point out the signal indicator and explain the two-engine architecture.
 5. If on-device mode is set up, disable the network and repeat step 2.

@@ -58,7 +58,7 @@ function renderSignal() {
 
   signalLabelEl.textContent =
     engineName === "on-device"
-      ? "On-device — no server needed"
+      ? "On-device – no server needed"
       : engineName === "local-server"
         ? "Local server (Ollama + Gemma)"
         : "Not connected";
@@ -115,7 +115,7 @@ function appendMessage(role, content) {
 function showEmergency(reason) {
   if (!bannerEl) return;
   bannerEl.hidden = false;
-  bannerEl.textContent = `Seek emergency care immediately — flagged: ${reason}`;
+  bannerEl.textContent = `Seek emergency care immediately – flagged: ${reason}`;
 }
 
 formEl.addEventListener("submit", async (e) => {
@@ -127,7 +127,7 @@ formEl.addEventListener("submit", async (e) => {
   appendMessage("user", text);
   history.push({ role: "user", content: text });
 
-  // Immediate client-side safety net — don't wait on the model to react
+  // Immediate client-side safety net – don't wait on the model to react
   // to an obvious emergency phrase.
   const emergency = detectEmergency(text);
   if (emergency) showEmergency(emergency.reason);
