@@ -5,25 +5,29 @@
    The signal indicator is the signature element: it's not decorative, it
    tells the truth about how the app is currently running (on-device vs
    local server vs offline), which is the entire premise of the product.
-   Fonts are system stacks only — no external font requests — because an
-   offline-first app should never depend on a network call to render text. */
+   Typography: Poppins (display/headings) + Inter (body) for a modern UI feel.
+   Fonts load from Google Fonts with a full system-font fallback chain so the
+   app still renders cleanly in fully-offline contexts. */
 
 :root {
-  --bg: #0b1210;
-  --surface: #121c18;
-  --surface-2: #182620;
-  --border: #223028;
+  --bg: #070c0a;
+  --surface: #101a16;
+  --surface-2: #162620;
+  --border: rgba(76, 217, 168, 0.12);
   --text: #eef3ef;
   --muted: #8fa89b;
   --accent: #4cd9a8;
   --accent-deep: #1f8f6c;
   --accent-soft: rgba(76, 217, 168, 0.14);
   --warn: #ff6b4a;
-  --warn-bg: #2c1712;
-  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --radius-lg: 16px;
-  --radius-md: 12px;
+  --warn-bg: rgba(44, 23, 18, 0.85);
+  --font-display: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Inter", "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.4);
 }
 
 * { box-sizing: border-box; }
@@ -31,123 +35,208 @@
 html, body {
   height: 100%;
   margin: 0;
+  padding: 0;
 }
 
 body {
-  background: radial-gradient(120% 140% at 50% -10%, #10201a 0%, #0b1210 55%);
+  background: radial-gradient(130% 130% at 50% -10%, #122820 0%, #060b09 70%);
   color: var(--text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 .app-shell {
+  width: 100%;
   max-width: 640px;
-  margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  background: rgba(16, 26, 22, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding: 2rem;
+  }
+  .app-shell {
+    height: 85vh;
+    max-height: 900px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(76, 217, 168, 0.05);
+  }
 }
 
 /* ---------- Header ---------- */
 
 .app-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 1.25rem 1.1rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(22, 38, 32, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .brand {
   display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 2.2rem;
+  height: 2.2rem;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--accent-soft);
+  background: linear-gradient(135deg, var(--accent-soft), rgba(76, 217, 168, 0.02));
   color: var(--accent);
+  border: 1px solid rgba(76, 217, 168, 0.2);
+  box-shadow: 0 0 10px rgba(76, 217, 168, 0.1);
+  transition: transform 0.4s ease;
+}
+
+.brand:hover .mark {
+  transform: rotate(90deg);
 }
 
 .brand-text h1 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.4rem;
+  font-family: "Poppins", var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
   margin: 0;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  letter-spacing: -0.02em;
+  background: linear-gradient(120deg, #ffffff 30%, #7be8c4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .tagline {
   margin: 0.15rem 0 0;
-  font-size: 0.78rem;
+  font-family: "Inter", var(--font-body);
+  font-size: 0.73rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   color: var(--muted);
 }
 
 .signal {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.4rem 0.7rem;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
   border-radius: 999px;
-  background: var(--surface);
+  background: rgba(24, 38, 32, 0.55);
   border: 1px solid var(--border);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--muted);
   white-space: nowrap;
-  margin-top: 0.15rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .signal-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   background: var(--muted);
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
+/* Pulsing halos for indicators */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(76, 217, 168, 0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(76, 217, 168, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 217, 168, 0); }
+}
+
+@keyframes pulse-yellow {
+  0% { box-shadow: 0 0 0 0 rgba(232, 182, 74, 0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(232, 182, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 182, 74, 0); }
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(255, 107, 74, 0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(255, 107, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 107, 74, 0); }
+}
+
+.signal.on-device {
+  border-color: rgba(76, 217, 168, 0.25);
+  background: rgba(76, 217, 168, 0.06);
+}
 .signal.on-device .signal-dot {
   background: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  animation: pulse-green 2s infinite;
 }
+.signal.on-device .signal-label { color: var(--accent); font-weight: 500; }
 
-.signal.on-device .signal-label { color: var(--accent); }
-
+.signal.local-server {
+  border-color: rgba(232, 182, 74, 0.25);
+  background: rgba(232, 182, 74, 0.06);
+}
 .signal.local-server .signal-dot {
   background: #e8b64a;
-  animation: pulse 1.6s ease-in-out infinite;
+  animation: pulse-yellow 2s infinite;
 }
+.signal.local-server .signal-label { color: #e8b64a; font-weight: 500; }
 
-.signal.local-server .signal-label { color: #e8b64a; }
-
-.signal.offline .signal-dot { background: var(--warn); }
-.signal.offline .signal-label { color: var(--warn); }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+.signal.offline {
+  border-color: rgba(255, 107, 74, 0.25);
+  background: rgba(255, 107, 74, 0.06);
 }
+.signal.offline .signal-dot {
+  background: var(--warn);
+  animation: pulse-red 2s infinite;
+}
+.signal.offline .signal-label { color: var(--warn); font-weight: 500; }
 
 /* ---------- Emergency banner ---------- */
 
 .emergency-banner {
-  margin: 0 1.25rem 0.9rem;
-  background: var(--warn-bg);
-  color: #ffb9a8;
-  border: 1px solid #5a2e22;
-  border-left: 3px solid var(--warn);
+  margin: 1rem 1.5rem 0.5rem;
+  background: linear-gradient(135deg, var(--warn-bg), rgba(58, 28, 20, 0.95));
+  color: #ffc4b7;
+  border: 1px solid rgba(255, 107, 74, 0.3);
+  border-left: 4px solid var(--warn);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  padding: 1rem 1.25rem;
+  font-weight: 500;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(255, 107, 74, 0.15);
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---------- Messages ---------- */
@@ -155,123 +244,401 @@ body {
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 0.25rem 1.25rem 1rem;
+  padding: 0.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.75rem;
+}
+
+.messages::-webkit-scrollbar {
+  width: 6px;
+}
+.messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+.messages::-webkit-scrollbar-thumb {
+  background: rgba(76, 217, 168, 0.1);
+  border-radius: 99px;
+}
+.messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 217, 168, 0.25);
 }
 
 .intro {
-  padding: 1.25rem 0 0.5rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 0.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(24, 38, 32, 0.45), rgba(16, 26, 22, 0.45));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin: 1.5rem 0 0.5rem;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .intro-eyebrow {
-  margin: 0 0 0.3rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  margin: 0 0 0.5rem;
+  font-family: "Inter", var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
+  opacity: 0.9;
 }
 
 .intro h2 {
-  font-family: var(--font-display);
+  font-family: "Poppins", var(--font-display);
   font-weight: 600;
-  font-size: 1.3rem;
-  margin: 0 0 0.5rem;
+  font-size: 1.45rem;
+  line-height: 1.25;
+  margin: 0 0 0.65rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
 }
 
 .intro-body {
-  margin: 0 0 1rem;
-  font-size: 0.9rem;
+  margin: 0;
+  font-family: "Inter", var(--font-body);
+  font-size: 0.93rem;
+  font-weight: 400;
   color: var(--muted);
-  line-height: 1.5;
-  max-width: 46ch;
+  line-height: 1.65;
 }
 
 .msg {
-  max-width: 82%;
-  padding: 0.7rem 0.95rem;
+  max-width: 85%;
+  padding: 0.85rem 1.15rem;
   border-radius: var(--radius-md);
-  line-height: 1.48;
-  font-size: 0.94rem;
+  line-height: 1.6;
+  font-family: "Inter", var(--font-body);
+  font-size: 0.93rem;
+  font-weight: 400;
   white-space: pre-wrap;
+  animation: fadeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .msg-user {
   align-self: flex-end;
-  background: var(--accent-deep);
-  color: #06231a;
+  background: linear-gradient(135deg, var(--accent-deep), #16684e);
+  color: #ffffff;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 15px rgba(31, 143, 108, 0.15);
 }
 
 .msg-assistant {
   align-self: flex-start;
-  background: var(--surface);
+  background: rgba(24, 38, 32, 0.45);
   border: 1px solid var(--border);
   border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- Markdown styles (scoped inside .msg) ---------- */
+
+/* Reset first/last child margins so bubbles don't grow extra space */
+.msg > *:first-child { margin-top: 0; }
+.msg > *:last-child  { margin-bottom: 0; }
+
+/* Paragraphs */
+.msg p {
+  margin: 0 0 0.6em;
+  line-height: 1.65;
+}
+
+/* Headings — assistant only really uses h2/h3 in structured responses */
+.msg h1, .msg h2, .msg h3, .msg h4 {
+  font-family: "Poppins", var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0.9em 0 0.4em;
+  color: var(--text);
+}
+.msg h1 { font-size: 1.15rem; }
+.msg h2 { font-size: 1.05rem; }
+.msg h3 { font-size: 0.97rem; color: var(--accent); }
+.msg h4 { font-size: 0.9rem; color: var(--muted); }
+
+/* Lists */
+.msg ul, .msg ol {
+  margin: 0.4em 0 0.6em;
+  padding-left: 1.4em;
+}
+.msg li {
+  margin-bottom: 0.3em;
+  line-height: 1.55;
+}
+.msg li::marker { color: var(--accent); }
+.msg ol li::marker { color: var(--accent); font-weight: 600; }
+.msg ul { list-style: disc; }
+
+/* Nested lists */
+.msg ul ul, .msg ol ul { list-style: circle; }
+
+/* Inline code */
+.msg code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(76, 217, 168, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(76, 217, 168, 0.18);
+  border-radius: 5px;
+  padding: 0.1em 0.45em;
+}
+
+/* Fenced code blocks */
+.msg pre {
+  margin: 0.6em 0;
+  padding: 0.85rem 1rem;
+  background: rgba(7, 12, 10, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+.msg pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #a3ecd1;
+  font-size: inherit;
+}
+
+/* Blockquotes — used for disclaimers / quoted guidance */
+.msg blockquote {
+  margin: 0.6em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--accent-deep);
+  background: rgba(76, 217, 168, 0.06);
+  border-radius: 0 8px 8px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.msg blockquote p { margin: 0; }
+
+/* Horizontal rules */
+.msg hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.75em 0;
+}
+
+/* Strong / emphasis */
+.msg strong { font-weight: 600; color: var(--text); }
+.msg em { font-style: italic; color: var(--muted); }
+
+/* Links */
+.msg a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: rgba(76, 217, 168, 0.35);
+  text-underline-offset: 2px;
+}
+.msg a:hover { text-decoration-color: var(--accent); }
+
+/* Tables */
+.msg table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.6em 0;
+  font-size: 0.88rem;
+}
+.msg th {
+  background: rgba(76, 217, 168, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.45em 0.75em;
+  border: 1px solid var(--border);
+}
+.msg td {
+  padding: 0.4em 0.75em;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.msg tr:nth-child(even) td { background: rgba(24, 38, 32, 0.3); }
+
+/* Override white-space for markdown content — pre-wrap breaks lists */
+.msg { white-space: normal; }
+/* User messages: keep raw text feel, no block formatting weirdness */
+.msg-user { white-space: pre-wrap; }
+
+
+.msg-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.95rem 1.25rem;
+}
+
+.msg-typing .dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--muted);
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.msg-typing .dot:nth-child(1) { animation-delay: -0.32s; }
+.msg-typing .dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.3); opacity: 0.4; }
+  40% { transform: scale(1.1); opacity: 1; }
 }
 
 /* ---------- Status + input ---------- */
 
 .status {
-  min-height: 1.1rem;
-  padding: 0 1.25rem;
-  margin: 0 0 0.3rem;
+  min-height: 1.5rem;
+  padding: 0.25rem 1.5rem;
+  margin: 0;
+  font-family: "Inter", var(--font-body);
   font-size: 0.78rem;
-  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status:empty {
+  min-height: 0;
+  padding: 0;
 }
 
 .chat-form {
   display: flex;
-  gap: 0.6rem;
-  padding: 0.75rem 1.25rem;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--border);
-  background: linear-gradient(180deg, transparent, rgba(11, 18, 16, 0.6));
+  background: rgba(11, 18, 16, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .chat-form input {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: rgba(24, 38, 32, 0.4);
   color: var(--text);
-  font-size: 0.94rem;
+  font-family: "Inter", var(--font-body);
+  font-size: 0.93rem;
+  font-weight: 400;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.chat-form input::placeholder { color: #5a6f65; }
-
 .chat-form input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(24, 38, 32, 0.7);
+  box-shadow: 0 0 0 3px var(--accent-soft), inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.chat-form input::placeholder {
+  color: rgba(143, 168, 155, 0.35);
+  font-style: italic;
 }
 
 .chat-form button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: var(--radius-md);
   border: none;
   background: var(--accent);
-  color: #06231a;
+  color: #080d0b;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(76, 217, 168, 0.2);
+  flex-shrink: 0;
 }
 
-.chat-form button:hover { background: #63e6bb; }
-.chat-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chat-form button:hover {
+  background: #63e6bb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(76, 217, 168, 0.3);
+}
+
+.chat-form button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(76, 217, 168, 0.2);
+}
+
+.chat-form button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 .disclaimer {
   text-align: center;
   font-size: 0.7rem;
-  color: #5a6f65;
-  padding: 0.6rem 1rem 1.1rem;
+  color: #4b5d54;
+  padding: 0.6rem 1.5rem 1.1rem;
   margin: 0;
+  background: rgba(11, 18, 16, 0.95);
+  border-top: 1px solid rgba(76, 217, 168, 0.05);
+  flex-shrink: 0;
+}
+
+/* ---------- Responsive Breakpoints ---------- */
+
+@media (max-width: 480px) {
+  .tagline {
+    display: none;
+  }
+  .app-header {
+    padding: 1rem 1.25rem;
+  }
+  .messages {
+    padding: 0.5rem 1.25rem 1.25rem;
+  }
+  .chat-form {
+    padding: 1rem 1.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    overflow: hidden;
+  }
+  .app-shell {
+    height: 100vh;
+    border-left: none;
+    border-right: none;
+  }
+  .chat-form {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+  .disclaimer {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .signal-dot { animation: none !important; }
+  .signal-dot, .msg-typing .dot {
+    animation: none !important;
+  }
+  .msg, .intro, .emergency-banner {
+    animation: none !important;
+  }
 }

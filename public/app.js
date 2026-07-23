@@ -2,6 +2,12 @@ import { detectEmergency } from "./prompt.js";
 import * as browserEngine from "./inference-browser.js";
 import * as serverEngine from "./inference-server.js";
 
+// Configure marked for safe, clean rendering
+marked.setOptions({
+  breaks: true,      // newlines become <br> inside paragraphs
+  gfm: true,         // GitHub Flavoured Markdown (tables, strikethrough, etc.)
+});
+
 const messagesEl = document.getElementById("messages");
 const introEl = document.getElementById("intro");
 const formEl = document.getElementById("chat-form");
@@ -63,7 +69,17 @@ function appendMessage(role, content) {
   if (introEl) introEl.remove();
   const el = document.createElement("div");
   el.className = `msg msg-${role}`;
-  el.textContent = content;
+
+  // Render Markdown for both roles; sanitize the HTML before injecting.
+  // For user messages we use inline parsing so a plain sentence doesn't get
+  // wrapped in a superfluous <p> tag, while assistant replies get full block
+  // Markdown (headings, lists, code blocks, bold, tables, etc.).
+  const raw =
+    role === "user"
+      ? DOMPurify.sanitize(marked.parseInline(content))
+      : DOMPurify.sanitize(marked.parse(content));
+
+  el.innerHTML = raw;
   messagesEl.appendChild(el);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -88,14 +104,32 @@ formEl.addEventListener("submit", async (e) => {
   if (emergency) showEmergency(emergency.reason);
 
   statusEl.textContent = "Thinking…";
+  
+  // Show visual typing indicator
+  const typingIndicator = document.createElement("div");
+  typingIndicator.className = "msg msg-assistant msg-typing";
+  typingIndicator.id = "typing-indicator";
+  typingIndicator.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  messagesEl.appendChild(typingIndicator);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
   try {
     const reply = await engine.chat(history);
+    
+    // Remove visual typing indicator
+    const indicatorEl = document.getElementById("typing-indicator");
+    if (indicatorEl) indicatorEl.remove();
+
     appendMessage("assistant", reply);
     history.push({ role: "assistant", content: reply });
 
     const replyEmergency = detectEmergency(reply);
     if (replyEmergency) showEmergency(replyEmergency.reason);
   } catch (err) {
+    // Remove visual typing indicator
+    const indicatorEl = document.getElementById("typing-indicator");
+    if (indicatorEl) indicatorEl.remove();
+
     appendMessage("assistant", "Something went wrong reaching the model. Please try again.");
     console.error(err);
   } finally {
@@ -106,5 +140,5 @@ formEl.addEventListener("submit", async (e) => {
 pickEngine().then(renderSignal);
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
+  navigator.serviceWorker.register("sw.js");
 }
