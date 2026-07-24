@@ -171,7 +171,7 @@ function renderSignal() {
 
   signalLabelEl.textContent =
     engineName === "on-device" ? "Gemma On-Device" :
-      engineName === "local-server" ? "Local Server" : "Inactive";
+      engineName === "local-server" ? "Render API Server" : "Inactive";
 }
 
 /**
@@ -201,20 +201,20 @@ async function loadOnDeviceEngine() {
 }
 
 /**
- * Loads the Local Server API engine
+ * Loads the Render API engine as fallback
  */
 async function loadLocalServerEngine() {
-  if (statusTextEl) statusTextEl.textContent = "Connecting to local Gemma server...";
+  if (statusTextEl) statusTextEl.textContent = "Connecting to Gemma Render API server...";
 
   if (!(await serverEngine.isAvailable())) {
-    throw new Error("Local backend server is unreachable. Is it running on localhost?");
+    throw new Error("Render API server is currently unreachable. Check server status or cold start delay.");
   }
 
   await serverEngine.load();
   engine = serverEngine;
   engineName = "local-server";
-  updateInputState(true, "Connected to local server. Type your message…");
-  showToast("Connected to local Gemma server API", "info", 5000);
+  updateInputState(true, "Connected to Render API. Type your message…");
+  showToast("Connected to Render API Backup Server", "info", 5000);
 }
 
 /**
@@ -232,11 +232,12 @@ async function switchEngine(targetEngine = "auto") {
     } else if (targetEngine === "local-server") {
       await loadLocalServerEngine();
     } else {
-      // Auto-detect mode: Try WebGPU first, then fall back to Local Server API
+      // Auto-detect mode: Try WebGPU first, then fall back to Render API
       try {
         await loadOnDeviceEngine();
       } catch (err) {
-        console.warn("Auto-detect: WebGPU unavailable. Trying local server...", err);
+        console.warn("Auto-detect: WebGPU unavailable. Falling back to Render API...", err);
+        showToast("WebGPU failed. Falling back to Render server...", "info", 4000);
         await loadLocalServerEngine();
       }
     }
