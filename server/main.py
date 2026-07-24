@@ -26,7 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-MODEL_NAME = "gemma3:1b"
+MODEL_NAME = "gemma4:e2b-it-qat"
 
 SYSTEM_PROMPT = """You are GemmaAid, a first-aid and general health information
 assistant designed to run fully offline for communities with limited or no
