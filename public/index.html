@@ -21,15 +21,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
     rel="stylesheet">
 
-  <!-- External Libraries: Marked (Markdown) & DOMPurify (HTML Sanitization) -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <!-- External Libraries: Local Offline Fallbacks with CDN Backup -->
+  <script src="./vendor/marked.min.js"
+    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/marked/marked.min.js';"></script>
+  <script src="./vendor/purify.min.js"
+    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js';"></script>
 
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
+
+  <!-- Toast Notification Overlay Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Main Application Wrapper -->
   <main class="app-shell">
@@ -56,6 +61,16 @@
 
       <!-- Top Header Action Controls -->
       <div class="header-controls">
+        <!-- Engine Selection Switcher -->
+        <!-- <div class="engine-selector-wrap">
+          <label for="engine-select" class="visually-hidden">Select AI Model Engine</label>
+          <select id="engine-select" class="engine-select" title="Switch AI Engine">
+            <option value="auto">Auto-Detect Engine</option>
+            <option value="on-device">On-Device (MediaPipe WebGPU)</option>
+            <option value="local-server">Local Server API</option>
+          </select>
+        </div> -->
+
         <!-- AI Engine Connection Status Badge -->
         <div class="signal" id="signal">
           <span class="signal-dot"></span>
@@ -141,9 +156,8 @@
 
     <!-- Live Model Load Progress & Status Bar -->
     <div class="status-bar" id="status-bar">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div class="status-bar-inner">
         <span id="status-text">Initializing AI engine…</span>
-        <!-- Powered by Gemma Badge moved down inside the chat interface -->
         <span class="gemma-badge">Powered by Gemma AI</span>
       </div>
       <div class="status-progress-track" id="status-progress" hidden>

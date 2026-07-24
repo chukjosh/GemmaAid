@@ -703,3 +703,228 @@ html.light-mode .msg-row.user .msg-bubble strong {
     border: 1px solid var(--border);
   }
 }
+
+/* Toast Notification Overlay Styles */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 260px;
+  max-width: 380px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #18221c;
+  color: #e1e7e4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 0.875rem;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.toast-success {
+  border-left: 4px solid #4cd9a8;
+}
+
+.toast-info {
+  border-left: 4px solid #3b82f6;
+}
+
+.toast-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.toast-danger {
+  border-left: 4px solid #ef4444;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #8fa398;
+  font-size: 1.25rem;
+  cursor: pointer;
+  margin-left: 0.75rem;
+  line-height: 1;
+}
+
+.toast-close:hover {
+  color: #fff;
+}
+
+/* Engine Switcher Select Dropdown */
+.engine-selector-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.engine-select {
+  background: #121a16;
+  color: #e1e7e4;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.engine-select:hover,
+.engine-select:focus {
+  border-color: #4cd9a8;
+}
+
+/* Responsive Header Controls */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Engine Selector Wrapper & Input */
+.engine-selector-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.engine-select {
+  background: #121a16;
+  color: #e1e7e4;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  max-width: 160px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.engine-select:hover,
+.engine-select:focus {
+  border-color: #4cd9a8;
+}
+
+/* Status Bar Flex Layout */
+.status-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Responsive Toast Banner Overlay */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  left: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+  align-items: flex-end;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 380px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #18221c;
+  color: #e1e7e4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.toast-success {
+  border-left: 4px solid #4cd9a8;
+}
+
+.toast-info {
+  border-left: 4px solid #3b82f6;
+}
+
+.toast-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.toast-danger {
+  border-left: 4px solid #ef4444;
+}
+
+/* Screen-Reader Only Utility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .engine-select {
+    max-width: 120px;
+    font-size: 0.75rem;
+  }
+
+  .toast-container {
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+}

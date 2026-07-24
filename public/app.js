@@ -22,16 +22,19 @@ const memoryTextEl = document.getElementById("memory-text");
 const clearBtn = document.getElementById("clear-btn");
 const soundToggleBtn = document.getElementById("sound-toggle");
 const themeToggleBtn = document.getElementById("theme-toggle");
+const engineSelectEl = document.getElementById("engine-select");
 const metaThemeColor = document.getElementById("meta-theme-color");
+const toastContainer = document.getElementById("toast-container");
 
 // Application State
 let engine = null;
-let engineName = "";
+let engineName = "offline";
 let history = [];
 let audioEnabled = true;
+let isInitializing = false;
 
 // Configure Marked.js parser if available
-if (typeof marked !== "undefined") {
+if (typeof marked !== "undefined" && marked.setOptions) {
   marked.setOptions({
     breaks: true,
     gfm: true
@@ -39,7 +42,45 @@ if (typeof marked !== "undefined") {
 }
 
 /**
- * Audio Feedback Helper (Generates a soft, non-intrusive sound on assistant completion)
+ * Toast Notification System (Auto-disappears after specified timeout)
+ * @param {string} message - Notification text
+ * @param {string} type - 'info' | 'warning' | 'success' | 'danger'
+ * @param {number} durationMs - Display time in milliseconds (default: 5000ms / 5s)
+ */
+function showToast(message, type = "info", durationMs = 5000) {
+  if (!toastContainer) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.role = "alert";
+  toast.innerHTML = `
+    <span class="toast-message">${message}</span>
+    <button class="toast-close" aria-label="Close notification">&times;</button>
+  `;
+
+  // Manual dismissal button
+  toast.querySelector(".toast-close").addEventListener("click", () => {
+    toast.classList.add("fade-out");
+    setTimeout(() => toast.remove(), 300);
+  });
+
+  toastContainer.appendChild(toast);
+
+  // Trigger entrance animation frame
+  requestAnimationFrame(() => toast.classList.add("show"));
+
+  // Automatic removal fallback timer
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.classList.remove("show");
+      toast.classList.add("fade-out");
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, durationMs);
+}
+
+/**
+ * Audio Feedback Helper (Generates a soft chime sound on completion)
  */
 function playBeep() {
   if (!audioEnabled || !window.AudioContext) return;
@@ -59,7 +100,7 @@ function playBeep() {
     osc.start();
     osc.stop(ctx.currentTime + 0.15);
   } catch (e) {
-    /* Silent catch for browser WebAudio restrictions prior to user interaction */
+    /* Silent catch for browser WebAudio restrictions */
   }
 }
 
@@ -67,7 +108,7 @@ function playBeep() {
  * Updates the context memory usage indicator in the toolbar
  */
 function updateMemoryMeter() {
-  const totalSlots = MAX_TURNS * 2; // Each turn consists of user + assistant message
+  const totalSlots = MAX_TURNS * 2;
   const usagePct = Math.min(100, Math.round((history.length / totalSlots) * 100));
   if (memoryTextEl) {
     memoryTextEl.textContent = `Memory: ${usagePct}% used (${history.length / 2}/${MAX_TURNS} turns)`;
@@ -85,22 +126,25 @@ function getTimeString() {
  * Formats Markdown responses safely using marked.js & DOMPurify
  */
 function parseAndSanitizeMarkdown(content, isUser = false) {
-  let formattedContent = content;
-
-  if (!isUser) {
-    // Add extra spacing for numbered lists in assistant medical steps
-    formattedContent = formattedContent.replace(/(\s)(\d+\.\s+\*\*)/g, "\n\n$2");
-    formattedContent = formattedContent.trim();
+  if (isUser) {
+    const div = document.createElement("div");
+    div.textContent = content;
+    return div.innerHTML;
   }
 
-  let parsedHtml = formattedContent;
-  if (typeof marked !== "undefined") {
-    parsedHtml = isUser ? marked.parseInline(formattedContent) : marked.parse(formattedContent);
+  let rawContent = content || "";
+
+  let parsedHtml = rawContent;
+  if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+    parsedHtml = marked.parse(rawContent);
+  } else {
+    parsedHtml = rawContent.replace(/\n/g, "<br>");
   }
 
-  if (typeof DOMPurify !== "undefined") {
+  if (typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize === "function") {
     return DOMPurify.sanitize(parsedHtml);
   }
+
   return parsedHtml;
 }
 
@@ -118,55 +162,6 @@ function updateInputState(enabled, placeholderText) {
 }
 
 /**
- * Picks and initializes the available AI engine (Browser WebGPU or Local Server)
- */
-async function pickEngine() {
-  if (statusTextEl) statusTextEl.textContent = "Checking AI model capabilities…";
-
-  // Check 1: WebGPU On-Device Browser Engine
-  if (await browserEngine.isAvailable()) {
-    try {
-      if (statusTextEl) statusTextEl.textContent = "Loading Gemma model into local WebGPU memory…";
-      if (progressTrackEl) progressTrackEl.hidden = false;
-
-      await browserEngine.load((progress) => {
-        const pct = Math.round(progress * 100);
-        if (statusTextEl) statusTextEl.textContent = `Downloading Gemma model: ${pct}%`;
-        if (progressFillEl) progressFillEl.style.width = `${pct}%`;
-      });
-
-      if (progressTrackEl) progressTrackEl.hidden = true;
-      engine = browserEngine;
-      engineName = "on-device";
-      updateInputState(true, "Ask Gemma about symptoms or first aid…");
-      return;
-    } catch (err) {
-      console.warn("Browser on-device load failed:", err);
-      if (progressTrackEl) progressTrackEl.hidden = true;
-    }
-  }
-
-  // Check 2: Local Backend API Server Engine
-  if (await serverEngine.isAvailable()) {
-    try {
-      await serverEngine.load();
-      engine = serverEngine;
-      engineName = "local-server";
-      updateInputState(true, "Connected to local server. Type your message…");
-      return;
-    } catch (err) {
-      console.warn("Local server engine error:", err);
-    }
-  }
-
-  // Fallback: Engine Unavailable
-  engineName = "offline";
-  if (statusTextEl) statusTextEl.textContent = "Model inactive or unreachable.";
-  updateInputState(false, "Engine unavailable");
-  appendSystemNotice("⚠️ **Model inactive.** Please open in a WebGPU-compatible browser (Chrome 113+) or connect to a local backend server.");
-}
-
-/**
  * Updates the top signal badge UI
  */
 function renderSignal() {
@@ -180,10 +175,92 @@ function renderSignal() {
 }
 
 /**
+ * Loads the WebGPU On-Device engine
+ */
+async function loadOnDeviceEngine() {
+  if (statusTextEl) statusTextEl.textContent = "Checking WebGPU hardware support...";
+
+  if (!(await browserEngine.isAvailable())) {
+    throw new Error("WebGPU is not supported or enabled in this browser.");
+  }
+
+  if (statusTextEl) statusTextEl.textContent = "Loading Gemma model into local WebGPU memory…";
+  if (progressTrackEl) progressTrackEl.hidden = false;
+
+  await browserEngine.load((progress) => {
+    const pct = Math.round(progress * 100);
+    if (statusTextEl) statusTextEl.textContent = `Downloading Gemma model: ${pct}%`;
+    if (progressFillEl) progressFillEl.style.width = `${pct}%`;
+  });
+
+  if (progressTrackEl) progressTrackEl.hidden = true;
+  engine = browserEngine;
+  engineName = "on-device";
+  updateInputState(true, "Ask Gemma about symptoms or first aid…");
+  showToast("Gemma loaded on-device via WebGPU", "success", 5000);
+}
+
+/**
+ * Loads the Local Server API engine
+ */
+async function loadLocalServerEngine() {
+  if (statusTextEl) statusTextEl.textContent = "Connecting to local Gemma server...";
+
+  if (!(await serverEngine.isAvailable())) {
+    throw new Error("Local backend server is unreachable. Is it running on localhost?");
+  }
+
+  await serverEngine.load();
+  engine = serverEngine;
+  engineName = "local-server";
+  updateInputState(true, "Connected to local server. Type your message…");
+  showToast("Connected to local Gemma server API", "info", 5000);
+}
+
+/**
+ * Initializes or switches the AI engine based on user selection or auto-detection
+ * @param {string} targetEngine - 'auto' | 'on-device' | 'local-server'
+ */
+async function switchEngine(targetEngine = "auto") {
+  if (isInitializing) return;
+  isInitializing = true;
+  updateInputState(false, "Switching engine...");
+
+  try {
+    if (targetEngine === "on-device") {
+      await loadOnDeviceEngine();
+    } else if (targetEngine === "local-server") {
+      await loadLocalServerEngine();
+    } else {
+      // Auto-detect mode: Try WebGPU first, then fall back to Local Server API
+      try {
+        await loadOnDeviceEngine();
+      } catch (err) {
+        console.warn("Auto-detect: WebGPU unavailable. Trying local server...", err);
+        await loadLocalServerEngine();
+      }
+    }
+  } catch (err) {
+    console.error("Engine switch failed:", err);
+    if (progressTrackEl) progressTrackEl.hidden = true;
+    engine = null;
+    engineName = "offline";
+    if (statusTextEl) statusTextEl.textContent = "Model inactive or unreachable.";
+    updateInputState(false, "Engine unavailable");
+    appendSystemNotice(`⚠️ **Engine error:** ${err.message || "Failed to load requested engine."}`);
+    showToast("Selected engine unreachable.", "warning", 5000);
+  } finally {
+    isInitializing = false;
+    renderSignal();
+    if (statusTextEl && engine) statusTextEl.textContent = "";
+  }
+}
+
+/**
  * Appends a new chat message bubble into the log
  */
 function appendMessage(role, content) {
-  if (introEl) introEl.remove();
+  if (introEl && introEl.parentNode) introEl.remove();
 
   const row = document.createElement("div");
   row.className = `msg-row ${role}`;
@@ -218,10 +295,10 @@ function appendMessage(role, content) {
  * Appends system notifications or warn badges
  */
 function appendSystemNotice(content) {
-  if (introEl) introEl.remove();
+  if (introEl && introEl.parentNode) introEl.remove();
   const notice = document.createElement("div");
   notice.className = "msg-system";
-  notice.innerHTML = parseAndSanitizeMarkdown(content, true);
+  notice.innerHTML = parseAndSanitizeMarkdown(content, false);
   messagesEl.appendChild(notice);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -235,25 +312,28 @@ function showEmergency(reason) {
   if (emergencyTextEl) {
     emergencyTextEl.textContent = `🚨 Critical Symptoms Detected: ${reason}`;
   }
+  showToast(`🚨 Urgent: ${reason}`, "danger", 5000);
 }
 
 /**
  * Core handler to process user message submissions
  */
 async function handleSendMessage(text) {
-  if (!text || !engine) return;
+  if (!text || !engine) {
+    showToast("Engine not ready. Please wait for model initialization.", "warning", 5000);
+    return;
+  }
 
   appendMessage("user", text);
   history.push({ role: "user", content: text });
 
-  // Check & prune memory when exceeding MAX_TURNS limit
   if (history.length > MAX_TURNS * 2) {
     history = history.slice(-MAX_TURNS * 2);
-    appendSystemNotice("ℹ️ *Older turns pruned automatically to preserve context memory.*");
+    appendSystemNotice("ℹ️ *Older turns pruned automatically to preserve memory.*");
+    showToast("Chat memory trimmed to preserve performance.", "info", 5000);
   }
   updateMemoryMeter();
 
-  // Scan input for life-threatening keywords
   const emergency = detectEmergency(text);
   if (emergency) showEmergency(emergency.reason);
 
@@ -265,12 +345,12 @@ async function handleSendMessage(text) {
     appendMessage("assistant", reply);
     history.push({ role: "assistant", content: reply });
 
-    // Also scan assistant reply for secondary red flags
     const replyEmergency = detectEmergency(reply);
     if (replyEmergency) showEmergency(replyEmergency.reason);
   } catch (err) {
     console.error("Inference Error:", err);
-    appendSystemNotice("⚠️ **Response interrupted.** Please rephrase or submit your query again.");
+    appendSystemNotice("⚠️ **Response interrupted.** Please try again.");
+    showToast("Failed to generate response. Check connection or engine status.", "danger", 5000);
   } finally {
     if (statusTextEl) statusTextEl.textContent = "";
     updateInputState(true, "Ask a follow-up or describe another symptom…");
@@ -279,6 +359,12 @@ async function handleSendMessage(text) {
 }
 
 // Event Listeners
+
+// Dropdown Switcher for Engine Selection
+engineSelectEl?.addEventListener("change", (e) => {
+  const selectedEngine = e.target.value;
+  switchEngine(selectedEngine);
+});
 
 // Chat Form Submit
 formEl.addEventListener("submit", (e) => {
@@ -296,6 +382,8 @@ document.addEventListener("click", (e) => {
     const prompt = e.target.getAttribute("data-prompt");
     if (prompt && engine) {
       handleSendMessage(prompt);
+    } else if (!engine) {
+      showToast("Engine is initializing. Please wait...", "warning", 5000);
     }
   }
 });
@@ -305,14 +393,16 @@ clearBtn?.addEventListener("click", () => {
   history = [];
   messagesEl.innerHTML = "";
   if (bannerEl) bannerEl.hidden = true;
-  appendSystemNotice("🧹 **Session cleared.** Chat context has been reset.");
+  appendSystemNotice("🧹 Session cleared. Context has been reset.");
   updateMemoryMeter();
+  showToast("Session cleared successfully", "success", 5000);
 });
 
 // Sound / Audio Feedback Toggle
 soundToggleBtn?.addEventListener("click", () => {
   audioEnabled = !audioEnabled;
   soundToggleBtn.style.opacity = audioEnabled ? "1" : "0.4";
+  showToast(audioEnabled ? "Audio chime enabled" : "Audio chime muted", "info", 3000);
 });
 
 // Light/Dark Theme Switcher
@@ -322,7 +412,14 @@ themeToggleBtn?.addEventListener("click", () => {
   if (metaThemeColor) {
     metaThemeColor.setAttribute("content", isLight ? "#f4f9f6" : "#070c0a");
   }
+  showToast(`Switched to ${isLight ? "Light" : "Dark"} mode`, "info", 3000);
 });
+
+// Restore Theme Preference on Load
+if (localStorage.getItem("theme") === "light") {
+  document.documentElement.classList.add("light-mode");
+  if (metaThemeColor) metaThemeColor.setAttribute("content", "#f4f9f6");
+}
 
 // Register Service Worker for PWA / Offline capability
 if ("serviceWorker" in navigator) {
@@ -333,5 +430,5 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// Initialize Application Engine
-pickEngine().then(renderSignal);
+// Initialize Application Engine with default auto-detect behavior
+switchEngine("auto");
